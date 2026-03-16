@@ -28,20 +28,6 @@ export const styles = {
     borderColor: 'divider',
   } satisfies SxProps<Theme>,
 
-  appBar: {
-    width: `calc(100% - ${SIDEBAR_WIDTH}px)`,
-    ml: `${SIDEBAR_WIDTH}px`,
-  } satisfies SxProps<Theme>,
-
-  main: {
-    flexGrow: 1,
-    ml: `${SIDEBAR_WIDTH}px`,
-    mt: '64px',
-    p: 3,
-    bgcolor: 'background.default',
-    minHeight: 'calc(100vh - 64px)',
-  } satisfies SxProps<Theme>,
-
   navItem: {
     borderRadius: 2,
     mx: 1,
@@ -54,3 +40,19 @@ export const styles = {
     },
   } satisfies SxProps<Theme>,
 };
+
+export const appBarSx = (isMobile: boolean): SxProps<Theme> => ({
+  width: isMobile ? '100%' : `calc(100% - ${SIDEBAR_WIDTH}px)`,
+  ml: isMobile ? 0 : `${SIDEBAR_WIDTH}px`,
+});
+
+export const mainSx = (isMobile: boolean): SxProps<Theme> => ({
+  flexGrow: 1,
+  ml: isMobile ? 0 : `${SIDEBAR_WIDTH}px`,
+  mt: '64px',
+  p: { xs: 2, sm: 3 },
+  bgcolor: 'background.default',
+  minHeight: 'calc(100vh - 64px)',
+  width: isMobile ? '100%' : `calc(100% - ${SIDEBAR_WIDTH}px)`,
+  boxSizing: 'border-box',
+});

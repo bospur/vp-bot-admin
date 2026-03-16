@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   AppBar,
@@ -12,14 +12,17 @@ import {
   Toolbar,
   Tooltip,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import PetsIcon from '@mui/icons-material/Pets';
 import CategoryIcon from '@mui/icons-material/Category';
 import ArticleIcon from '@mui/icons-material/Article';
 import LogoutIcon from '@mui/icons-material/Logout';
+import MenuIcon from '@mui/icons-material/Menu';
 import { useAuth } from '../../config/AuthContext';
 import { useNotification } from '../Notification/NotificationContext';
-import { styles } from './styles';
+import { styles, appBarSx, mainSx } from './styles';
 
 const NAV_ITEMS = [
   { label: 'Животные', to: '/animals', icon: <PetsIcon /> },
@@ -36,6 +39,9 @@ export function Layout({ children, title = 'VP Admin' }: LayoutProps) {
   const { logout } = useAuth();
   const { notify } = useNotification();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -43,35 +49,45 @@ export function Layout({ children, title = 'VP Admin' }: LayoutProps) {
     navigate('/login');
   };
 
+  const drawerContent = (
+    <>
+      <Box sx={styles.drawerHeader}>
+        <PetsIcon color="primary" sx={{ mr: 1 }} />
+        <Typography variant="h6" color="primary" fontWeight={700}>
+          VP Admin
+        </Typography>
+      </Box>
+      <List sx={{ pt: 1, flexGrow: 1 }}>
+        {NAV_ITEMS.map(({ label, to, icon }) => (
+          <ListItemButton
+            key={to}
+            component={NavLink}
+            to={to}
+            sx={styles.navItem}
+            onClick={() => isMobile && setMobileOpen(false)}
+          >
+            <ListItemIcon sx={{ minWidth: 40 }}>{icon}</ListItemIcon>
+            <ListItemText primary={label} />
+          </ListItemButton>
+        ))}
+      </List>
+    </>
+  );
+
   return (
     <Box sx={styles.root}>
-      {/* Sidebar */}
-      <Drawer variant="permanent" sx={styles.drawer}>
-        <Box sx={styles.drawerHeader}>
-          <PetsIcon color="primary" sx={{ mr: 1 }} />
-          <Typography variant="h6" color="primary" fontWeight={700}>
-            VP Admin
-          </Typography>
-        </Box>
-
-        <List sx={{ pt: 1, flexGrow: 1 }}>
-          {NAV_ITEMS.map(({ label, to, icon }) => (
-            <ListItemButton
-              key={to}
-              component={NavLink}
-              to={to}
-              sx={styles.navItem}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}>{icon}</ListItemIcon>
-              <ListItemText primary={label} />
-            </ListItemButton>
-          ))}
-        </List>
-      </Drawer>
-
       {/* AppBar */}
-      <AppBar position="fixed" sx={styles.appBar} color="inherit">
+      <AppBar position="fixed" sx={appBarSx(isMobile)} color="inherit">
         <Toolbar>
+          {isMobile && (
+            <IconButton
+              edge="start"
+              sx={{ mr: 1 }}
+              onClick={() => setMobileOpen(true)}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
           <Typography variant="h6" fontWeight={600} sx={{ flexGrow: 1 }}>
             {title}
           </Typography>
@@ -83,8 +99,28 @@ export function Layout({ children, title = 'VP Admin' }: LayoutProps) {
         </Toolbar>
       </AppBar>
 
+      {/* Sidebar — temporary на мобиле, permanent на десктопе */}
+      {isMobile ? (
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          ModalProps={{ keepMounted: true }}
+          sx={{ ...styles.drawer, display: { xs: 'block', md: 'none' } }}
+        >
+          {drawerContent}
+        </Drawer>
+      ) : (
+        <Drawer
+          variant="permanent"
+          sx={{ ...styles.drawer, display: { xs: 'none', md: 'block' } }}
+        >
+          {drawerContent}
+        </Drawer>
+      )}
+
       {/* Main content */}
-      <Box component="main" sx={styles.main}>
+      <Box component="main" sx={mainSx(isMobile)}>
         {children}
       </Box>
     </Box>

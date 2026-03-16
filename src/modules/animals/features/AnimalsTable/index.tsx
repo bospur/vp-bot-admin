@@ -11,6 +11,8 @@ import {
   TableRow,
   Tooltip,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -26,6 +28,8 @@ interface AnimalsTableProps {
 
 export function AnimalsTable({ data, onEdit, onDelete }: AnimalsTableProps) {
   const { table } = useAnimalsTableLogic({ data, onEdit, onDelete });
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   if (data.length === 0) {
     return (
@@ -35,6 +39,41 @@ export function AnimalsTable({ data, onEdit, onDelete }: AnimalsTableProps) {
     );
   }
 
+  // Мобиль — карточки
+  if (isMobile) {
+    return (
+      <Box sx={styles.cardList}>
+        {table.getRowModel().rows.map((row) => {
+          const animal = row.original;
+          return (
+            <Paper key={animal.id} sx={styles.card}>
+              <Box sx={styles.cardIcon}>{animal.icon || '🐾'}</Box>
+              <Box sx={styles.cardContent}>
+                <Typography fontWeight={600} noWrap>{animal.name}</Typography>
+                <Typography variant="body2" color="text.secondary" noWrap>
+                  {animal.slug}
+                </Typography>
+              </Box>
+              <Box sx={styles.cardActions}>
+                <Tooltip title="Редактировать">
+                  <IconButton size="small" onClick={() => onEdit(animal)}>
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Удалить">
+                  <IconButton size="small" color="error" onClick={() => onDelete(animal)}>
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Paper>
+          );
+        })}
+      </Box>
+    );
+  }
+
+  // Десктоп — таблица
   return (
     <Paper sx={styles.paper}>
       <TableContainer>

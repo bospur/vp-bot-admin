@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Box, Button, CircularProgress, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { Layout } from '../../shared/ui/Layout';
 import { AnimalsTable } from '../../modules/animals/features/AnimalsTable';
@@ -13,6 +13,8 @@ import type { Animal } from '../../modules/animals/domain/types';
 export function AnimalsScreen() {
   const { notify } = useNotification();
   const queryClient = useQueryClient();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [formOpen, setFormOpen] = useState(false);
   const [editAnimal, setEditAnimal] = useState<Animal | null>(null);
@@ -54,9 +56,17 @@ export function AnimalsScreen() {
     <Layout title="Животные">
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h5" fontWeight={600}>Животные</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleAdd}>
-          Добавить
-        </Button>
+        {isMobile ? (
+          <Tooltip title="Добавить">
+            <IconButton color="primary" onClick={handleAdd}>
+              <AddIcon />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Button variant="contained" startIcon={<AddIcon />} onClick={handleAdd}>
+            Добавить
+          </Button>
+        )}
       </Box>
 
       {isLoading && (
