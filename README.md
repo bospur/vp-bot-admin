@@ -1,51 +1,29 @@
-# VP Bot Admin
+# vp-bot-admin
 
-Панель управления контентом для Telegram Mini App ветеринарной клиники.
+Административная панель для ветеринарного Telegram Mini App.
+Позволяет управлять контентом: животные, категории симптомов, статьи первой помощи.
+
+**Prod:** https://admin.snzbeachvolleyball25.ru
 
 ## Стек
 
 | Инструмент | Назначение |
 |---|---|
-| Vite + React + TypeScript | Основа |
+| Vite 8 + React 19 + TypeScript | Основа |
 | MUI v7 | UI-компоненты |
 | React Router v7 | Роутинг |
 | TanStack Query v5 | Серверное состояние |
 | TanStack Table v8 | Таблицы |
 | React Hook Form + Valibot | Формы и валидация |
+| TipTap v2 | WYSIWYG редактор статей |
 | Axios | HTTP-клиент |
-| React Context | Auth состояние |
-
-## Архитектура (Feature-Sliced Design)
-
-```
-src/
-├── data/source/          # axios-вызовы к API
-├── modules/
-│   └── {name}/
-│       ├── domain/       # типы, константы
-│       └── features/
-│           └── {Component}/
-│               ├── useLogic.ts   # вся логика
-│               ├── index.tsx     # чистый TSX
-│               └── styles.ts     # MUI sx-объекты
-├── screens/              # страницы + роутинг
-├── shared/
-│   ├── config/           # env, AuthContext
-│   ├── theme/            # MUI тема (единый источник токенов)
-│   └── ui/               # переиспользуемые компоненты
-```
-
-**Правила:**
-- Вся логика в `useLogic.ts`, TSX остаётся чистым
-- Стили только через MUI `sx` + `styles.ts`, без хардкода значений
-- Серверное состояние — TanStack Query, Auth — React Context
-- Глобального store нет
+| emoji-picker-react | Выбор иконок |
 
 ## Запуск локально
 
 ```bash
-cp .env.example .env   # заполни VITE_API_URL
 npm install
+cp .env.example .env.local   # задай VITE_API_URL и VITE_CLINIC_SLUG
 npm run dev
 ```
 
@@ -53,51 +31,25 @@ npm run dev
 
 | Переменная | Описание | Пример |
 |---|---|---|
-| `VITE_API_URL` | Базовый URL бэкенда | `https://api.example.com` |
+| `VITE_API_URL` | Базовый URL бэкенда | `https://api.snzbeachvolleyball25.ru` |
+| `VITE_CLINIC_SLUG` | Slug клиники | `default` |
 
-## API
+## Статус
 
-Бэкенд: `vp-bot-server` (Go + PostgreSQL)
-
-### Авторизация
-
-```
-POST /api/admin/login
-Body: { "login": "string", "password": "string" }
-Response: { "token": "jwt_string" }
-```
-
-Все защищённые запросы: заголовок `Authorization: Bearer <token>`
-
-### Контент (защищённые роуты)
-
-| Метод | URL | Описание |
-|---|---|---|
-| POST | `/api/admin/animals` | Создать животное |
-| PUT | `/api/admin/animals/{id}` | Обновить животное |
-| DELETE | `/api/admin/animals/{id}` | Удалить животное |
-| POST | `/api/admin/categories` | Создать категорию |
-| PUT | `/api/admin/categories/{id}` | Обновить категорию |
-| DELETE | `/api/admin/categories/{id}` | Удалить категорию |
-| POST | `/api/admin/articles` | Создать статью |
-| PUT | `/api/admin/articles/{id}` | Обновить статью |
-| DELETE | `/api/admin/articles/{id}` | Удалить статью |
-
-## Деплой
-
-Сборка: `npm run build` → папка `dist/`
-Nginx отдаёт `dist/` по пути `/admin` на домене `api.snzbeachvolleyball25.ru`
-CI/CD: GitHub Actions деплоит при пуше в ветку `dev`
-
-## Статус разработки
-
-- [x] Проект, зависимости, архитектура
-- [x] MUI тема (бело-зелёная)
 - [x] Auth: JWT, AuthContext, axios interceptor
-- [x] Уведомления: NotificationContext (Snackbar)
-- [x] Экран логина (RHF + Valibot, обработка ошибок)
-- [ ] Layout: AppBar + Sidebar
-- [ ] CRUD: Животные
-- [ ] CRUD: Категории
-- [ ] CRUD: Статьи
-- [ ] Деплой
+- [x] Layout: AppBar + Sidebar (mobile hamburger)
+- [x] CRUD: Животные (таблица/карточки + emoji picker)
+- [x] CRUD: Категории (аккордеон по животным + emoji picker)
+- [x] CRUD: Статьи (список + full-page WYSIWYG редактор)
+- [x] TipTap редактор: H1/H2/H3, bold, italic, списки
+- [x] Авто-slug из заголовка (транслитерация)
+- [x] Привязка статей к категориям (чекбоксы)
+- [x] Деплой: GitHub Actions → VPS (scp)
+- [x] Bundle оптимизация: lazy routes + manual chunks
+- [ ] Mini App (vp-bot-app) — не начат
+
+## Документация
+
+- [Архитектура](docs/architecture.md)
+- [Деплой](docs/deployment.md)
+- [Инструкция для пользователя](docs/user-guide.md)
