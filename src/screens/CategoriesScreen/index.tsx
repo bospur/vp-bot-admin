@@ -102,6 +102,7 @@ export function CategoriesScreen() {
 
       {!isLoading && !isError && (
         <CategoriesTable
+          animals={animals}
           data={categories}
           onEdit={handleEdit}
           onDelete={setDeleteTarget}

@@ -1,38 +1,27 @@
-import { useMemo } from 'react';
-import {
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  type ColumnDef,
-} from '@tanstack/react-table';
+import { useMemo, useState } from 'react';
+import type { Animal } from '../../../animals/domain/types';
 import type { CategoryRow } from '../../domain/types';
 
 interface UseCategoriesTableLogicProps {
+  animals: Animal[];
   data: CategoryRow[];
-  onEdit: (category: CategoryRow) => void;
-  onDelete: (category: CategoryRow) => void;
 }
 
-export function useCategoriesTableLogic({ data, onEdit, onDelete }: UseCategoriesTableLogicProps) {
-  const columns = useMemo<ColumnDef<CategoryRow>[]>(
-    () => [
-      { accessorKey: 'sort_order', header: '№', size: 60 },
-      { accessorKey: 'icon', header: 'Иконка', size: 80 },
-      { accessorKey: 'name', header: 'Название' },
-      { accessorKey: 'slug', header: 'Slug' },
-      { accessorKey: 'animalName', header: 'Животное' },
-      { id: 'actions', header: '', size: 100, meta: { onEdit, onDelete } },
-    ],
-    [onEdit, onDelete],
-  );
+export function useCategoriesTableLogic({ animals, data }: UseCategoriesTableLogicProps) {
+  // По умолчанию открыт первый аккордеон
+  const [expanded, setExpanded] = useState<number | null>(animals[0]?.id ?? null);
 
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    initialState: { sorting: [{ id: 'sort_order', desc: false }] },
-  });
+  const grouped = useMemo(() => {
+    return animals.map((animal) => ({
+      animal,
+      categories: data
+        .filter((c) => c.animal_id === animal.id)
+        .sort((a, b) => a.sort_order - b.sort_order),
+    }));
+  }, [animals, data]);
 
-  return { table };
+  const toggle = (animalId: number) =>
+    setExpanded((prev) => (prev === animalId ? null : animalId));
+
+  return { grouped, expanded, toggle };
 }
