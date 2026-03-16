@@ -6,6 +6,7 @@ import { LoginScreen } from './screens/LoginScreen';
 import { AnimalsScreen } from './screens/AnimalsScreen';
 import { CategoriesScreen } from './screens/CategoriesScreen';
 import { ArticlesScreen } from './screens/ArticlesScreen';
+import { ArticleEditorScreen } from './screens/ArticleEditorScreen';
 
 export default function App() {
   return (
@@ -19,6 +20,8 @@ export default function App() {
               <Route path="/animals" element={<AnimalsScreen />} />
               <Route path="/categories" element={<CategoriesScreen />} />
               <Route path="/articles" element={<ArticlesScreen />} />
+              <Route path="/articles/new" element={<ArticleEditorScreen />} />
+              <Route path="/articles/:id/edit" element={<ArticleEditorScreen />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/animals" replace />} />
