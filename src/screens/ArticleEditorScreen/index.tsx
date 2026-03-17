@@ -6,24 +6,27 @@ import { valibotResolver } from '@hookform/resolvers/valibot';
 import * as v from 'valibot';
 import {
   Accordion, AccordionDetails, AccordionSummary,
-  Box, Button, Checkbox, CircularProgress,
+  Box, Button, Checkbox, Chip, CircularProgress,
   FormControlLabel, FormHelperText, InputLabel,
   Stack, TextField, Typography,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SaveIcon from '@mui/icons-material/Save';
+import PublishIcon from '@mui/icons-material/Publish';
+import UnpublishedIcon from '@mui/icons-material/Unpublished';
 import { Layout } from '../../shared/ui/Layout';
 import { RichTextEditor } from '../../shared/ui/RichTextEditor';
 import { getAnimals } from '../../data/source/animals';
 import { getCategoriesByAnimalSlug } from '../../data/source/categories';
 import {
   getArticle, getArticleCategories,
-  createArticle, updateArticle,
+  createArticle, updateArticle, updateArticleStatus,
   assignCategory, unassignCategory,
 } from '../../data/source/articles';
 import { useNotification } from '../../shared/ui/Notification/NotificationContext';
 import { ConfirmDialog } from '../../shared/ui/ConfirmDialog';
+import { useAuth } from '../../shared/config/AuthContext';
 import type { ArticleFormValues } from '../../modules/articles/domain/types';
 
 const schema = v.object({
@@ -59,6 +62,8 @@ export function ArticleEditorScreen() {
 
   const navigate = useNavigate();
   const { notify } = useNotification();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const queryClient = useQueryClient();
 
   const [expandedAnimal, setExpandedAnimal] = useState<number | null>(null);
@@ -101,6 +106,14 @@ export function ArticleEditorScreen() {
       });
     }
   }, [article, articleCategories, reset]);
+
+  // Editor не может редактировать опубликованную статью
+  useEffect(() => {
+    if (article && !isAdmin && article.status === 'published') {
+      notify('Опубликованные статьи недоступны для редактирования', 'error');
+      navigate('/articles');
+    }
+  }, [article, isAdmin, navigate, notify]);
 
   // Загрузка животных и категорий для чекбоксов
   const { data: animals = [], isLoading: animalsLoading } = useQuery({
@@ -163,6 +176,22 @@ export function ArticleEditorScreen() {
     onError: () => notify('Ошибка сохранения', 'error'),
   });
 
+  const publishMutation = useMutation({
+    mutationFn: () => updateArticleStatus(
+      articleId!,
+      article?.status === 'published' ? 'draft' : 'published',
+    ),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: ['article', articleId] });
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+      notify(
+        updated.status === 'published' ? 'Статья опубликована' : 'Статья снята с публикации',
+        'success',
+      );
+    },
+    onError: () => notify('Ошибка изменения статуса', 'error'),
+  });
+
   const onSubmit = form.handleSubmit((values) => saveMutation.mutate(values));
 
   const blocker = useBlocker(isDirty && !saveMutation.isPending);
@@ -187,17 +216,38 @@ export function ArticleEditorScreen() {
         <Box sx={{ maxWidth: 800 }}>
           {/* Шапка */}
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-            <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/articles')}>
-              Назад
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={saveMutation.isPending ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
-              onClick={onSubmit}
-              disabled={saveMutation.isPending}
-            >
-              {saveMutation.isPending ? 'Сохранение...' : 'Сохранить'}
-            </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/articles')}>
+                Назад
+              </Button>
+              {isEdit && article && (
+                article.status === 'published'
+                  ? <Chip label="Опубликована" color="success" size="small" variant="outlined" />
+                  : <Chip label="Черновик" size="small" variant="outlined" />
+              )}
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              {isAdmin && isEdit && (
+                <Button
+                  variant="outlined"
+                  startIcon={publishMutation.isPending
+                    ? <CircularProgress size={16} color="inherit" />
+                    : article?.status === 'published' ? <UnpublishedIcon /> : <PublishIcon />}
+                  onClick={() => publishMutation.mutate()}
+                  disabled={publishMutation.isPending}
+                >
+                  {article?.status === 'published' ? 'Снять' : 'Опубликовать'}
+                </Button>
+              )}
+              <Button
+                variant="contained"
+                startIcon={saveMutation.isPending ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
+                onClick={onSubmit}
+                disabled={saveMutation.isPending}
+              >
+                {saveMutation.isPending ? 'Сохранение...' : 'Сохранить'}
+              </Button>
+            </Box>
           </Box>
 
           <Stack spacing={3}>

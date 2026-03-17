@@ -9,12 +9,14 @@ import AddIcon from '@mui/icons-material/Add';
 import { Layout } from '../../shared/ui/Layout';
 import { ArticlesTable } from '../../modules/articles/features/ArticlesTable';
 import { ConfirmDialog } from '../../shared/ui/ConfirmDialog';
-import { getArticles, deleteArticle } from '../../data/source/articles';
+import { getArticles, deleteArticle, updateArticleStatus } from '../../data/source/articles';
 import { useNotification } from '../../shared/ui/Notification/NotificationContext';
+import { useAuth } from '../../shared/config/AuthContext';
 import type { Article } from '../../modules/articles/domain/types';
 
 export function ArticlesScreen() {
   const { notify } = useNotification();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const isMobile = useMediaQuery(useTheme().breakpoints.down('sm'));
@@ -35,6 +37,21 @@ export function ArticlesScreen() {
     },
     onError: () => notify('Ошибка удаления', 'error'),
   });
+
+  const publishMutation = useMutation({
+    mutationFn: (article: Article) =>
+      updateArticleStatus(article.id, article.status === 'published' ? 'draft' : 'published'),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+      notify(
+        updated.status === 'published' ? 'Статья опубликована' : 'Статья снята с публикации',
+        'success',
+      );
+    },
+    onError: () => notify('Ошибка изменения статуса', 'error'),
+  });
+
+  const role = user?.role ?? 'editor';
 
   return (
     <Layout title="Статьи">
@@ -64,8 +81,10 @@ export function ArticlesScreen() {
       {!isLoading && !isError && (
         <ArticlesTable
           data={articles}
+          role={role}
           onEdit={(a) => navigate(`/articles/${a.id}/edit`)}
           onDelete={setDeleteTarget}
+          onPublish={(a) => publishMutation.mutate(a)}
         />
       )}
 

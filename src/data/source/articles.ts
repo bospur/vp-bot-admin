@@ -35,6 +35,11 @@ export async function updateArticle(id: number, input: ArticleFormValues): Promi
   return data;
 }
 
+export async function updateArticleStatus(id: number, status: 'draft' | 'published'): Promise<Article> {
+  const { data } = await axiosInstance.patch<Article>(`/api/admin/articles/${id}/status`, { status });
+  return data;
+}
+
 export async function deleteArticle(id: number): Promise<void> {
   await axiosInstance.delete(`/api/admin/articles/${id}`);
 }
