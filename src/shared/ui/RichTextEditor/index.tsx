@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Box, Divider, IconButton, Paper, Tooltip } from '@mui/material';
@@ -21,6 +22,13 @@ export function RichTextEditor({ value, onChange, error }: RichTextEditorProps) 
       onChange(editor.getHTML());
     },
   });
+
+  useEffect(() => {
+    if (!editor) return;
+    if (value !== editor.getHTML()) {
+      editor.commands.setContent(value, false);
+    }
+  }, [value, editor]);
 
   if (!editor) return null;
 
