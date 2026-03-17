@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useBlocker } from 'react-router-dom';
 import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { valibotResolver } from '@hookform/resolvers/valibot';
@@ -23,6 +23,7 @@ import {
   assignCategory, unassignCategory,
 } from '../../data/source/articles';
 import { useNotification } from '../../shared/ui/Notification/NotificationContext';
+import { ConfirmDialog } from '../../shared/ui/ConfirmDialog';
 import type { ArticleFormValues } from '../../modules/articles/domain/types';
 
 const schema = v.object({
@@ -66,9 +67,15 @@ export function ArticleEditorScreen() {
     resolver: valibotResolver(schema),
     defaultValues: { title: '', slug: '', content: '', categoryIds: [] },
   });
-  const { control, formState: { errors }, setValue, watch, reset } = form;
+  const { control, formState: { errors, isDirty }, setValue, watch, reset } = form;
   const titleValue = watch('title');
   const categoryIds = watch('categoryIds');
+
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => { if (isDirty) e.preventDefault(); };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [isDirty]);
 
   // Загрузка статьи при редактировании
   const { data: article, isLoading: articleLoading } = useQuery({
@@ -157,6 +164,8 @@ export function ArticleEditorScreen() {
   });
 
   const onSubmit = form.handleSubmit((values) => saveMutation.mutate(values));
+
+  const blocker = useBlocker(isDirty && !saveMutation.isPending);
 
   const isLoading = (isEdit && (articleLoading || articleCatsLoading)) || animalsLoading;
 
@@ -294,6 +303,14 @@ export function ArticleEditorScreen() {
           </Stack>
         </Box>
       )}
+      <ConfirmDialog
+        open={blocker.state === 'blocked'}
+        title="Несохранённые изменения"
+        message="Вы уходите со страницы. Все несохранённые изменения будут потеряны."
+        confirmLabel="Покинуть"
+        onConfirm={() => blocker.proceed?.()}
+        onClose={() => blocker.reset?.()}
+      />
     </Layout>
   );
 }
