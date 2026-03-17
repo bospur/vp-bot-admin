@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { CircularProgress, Box } from '@mui/material';
 import { AuthProvider } from './shared/config/AuthContext';
 import { NotificationProvider } from './shared/ui/Notification/NotificationContext';
@@ -17,27 +17,26 @@ const Loader = () => (
   </Box>
 );
 
+const router = createBrowserRouter([
+  { path: '/login', element: <Suspense fallback={<Loader />}><LoginScreen /></Suspense> },
+  {
+    element: <ProtectedRoute />,
+    children: [
+      { path: '/animals', element: <Suspense fallback={<Loader />}><AnimalsScreen /></Suspense> },
+      { path: '/categories', element: <Suspense fallback={<Loader />}><CategoriesScreen /></Suspense> },
+      { path: '/articles', element: <Suspense fallback={<Loader />}><ArticlesScreen /></Suspense> },
+      { path: '/articles/new', element: <Suspense fallback={<Loader />}><ArticleEditorScreen /></Suspense> },
+      { path: '/articles/:id/edit', element: <Suspense fallback={<Loader />}><ArticleEditorScreen /></Suspense> },
+    ],
+  },
+  { path: '*', element: <Navigate to="/animals" replace /> },
+]);
+
 export default function App() {
   return (
     <AuthProvider>
       <NotificationProvider>
-        <BrowserRouter>
-          <Suspense fallback={<Loader />}>
-            <Routes>
-              <Route path="/login" element={<LoginScreen />} />
-
-              <Route element={<ProtectedRoute />}>
-                <Route path="/animals" element={<AnimalsScreen />} />
-                <Route path="/categories" element={<CategoriesScreen />} />
-                <Route path="/articles" element={<ArticlesScreen />} />
-                <Route path="/articles/new" element={<ArticleEditorScreen />} />
-                <Route path="/articles/:id/edit" element={<ArticleEditorScreen />} />
-              </Route>
-
-              <Route path="*" element={<Navigate to="/animals" replace />} />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
+        <RouterProvider router={router} />
       </NotificationProvider>
     </AuthProvider>
   );
