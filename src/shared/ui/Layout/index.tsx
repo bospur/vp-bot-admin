@@ -18,6 +18,7 @@ import {
 import PetsIcon from '@mui/icons-material/Pets';
 import CategoryIcon from '@mui/icons-material/Category';
 import ArticleIcon from '@mui/icons-material/Article';
+import PeopleIcon from '@mui/icons-material/People';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useAuth } from '../../config/AuthContext';
@@ -25,9 +26,10 @@ import { useNotification } from '../Notification/NotificationContext';
 import { styles, appBarSx, mainSx } from './styles';
 
 const NAV_ITEMS = [
-  { label: 'Животные', to: '/animals', icon: <PetsIcon /> },
-  { label: 'Категории', to: '/categories', icon: <CategoryIcon /> },
-  { label: 'Статьи', to: '/articles', icon: <ArticleIcon /> },
+  { label: 'Животные', to: '/animals', icon: <PetsIcon />, adminOnly: false },
+  { label: 'Категории', to: '/categories', icon: <CategoryIcon />, adminOnly: false },
+  { label: 'Статьи', to: '/articles', icon: <ArticleIcon />, adminOnly: false },
+  { label: 'Пользователи', to: '/users', icon: <PeopleIcon />, adminOnly: true },
 ];
 
 interface LayoutProps {
@@ -36,7 +38,7 @@ interface LayoutProps {
 }
 
 export function Layout({ children, title = 'VP Admin' }: LayoutProps) {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const { notify } = useNotification();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -58,7 +60,7 @@ export function Layout({ children, title = 'VP Admin' }: LayoutProps) {
         </Typography>
       </Box>
       <List sx={{ pt: 1, flexGrow: 1 }}>
-        {NAV_ITEMS.map(({ label, to, icon }) => (
+        {NAV_ITEMS.filter(({ adminOnly }) => !adminOnly || user?.role === 'admin').map(({ label, to, icon }) => (
           <ListItemButton
             key={to}
             component={NavLink}

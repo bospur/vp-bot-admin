@@ -10,6 +10,7 @@ const AnimalsScreen = lazy(() => import('./screens/AnimalsScreen').then((m) => (
 const CategoriesScreen = lazy(() => import('./screens/CategoriesScreen').then((m) => ({ default: m.CategoriesScreen })));
 const ArticlesScreen = lazy(() => import('./screens/ArticlesScreen').then((m) => ({ default: m.ArticlesScreen })));
 const ArticleEditorScreen = lazy(() => import('./screens/ArticleEditorScreen').then((m) => ({ default: m.ArticleEditorScreen })));
+const UsersScreen = lazy(() => import('./screens/UsersScreen').then((m) => ({ default: m.UsersScreen })));
 
 const Loader = () => (
   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -27,6 +28,7 @@ const router = createBrowserRouter([
       { path: '/articles', element: <Suspense fallback={<Loader />}><ArticlesScreen /></Suspense> },
       { path: '/articles/new', element: <Suspense fallback={<Loader />}><ArticleEditorScreen /></Suspense> },
       { path: '/articles/:id/edit', element: <Suspense fallback={<Loader />}><ArticleEditorScreen /></Suspense> },
+      { path: '/users', element: <Suspense fallback={<Loader />}><UsersScreen /></Suspense> },
     ],
   },
   { path: '*', element: <Navigate to="/animals" replace /> },
