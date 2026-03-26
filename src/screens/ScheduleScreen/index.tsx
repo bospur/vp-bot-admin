@@ -3,7 +3,7 @@ import {
   Avatar, Box, Chip, CircularProgress, FormControl,
   InputLabel, MenuItem, Paper, Select, Stack,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Typography,
+  Typography, useMediaQuery, useTheme,
 } from '@mui/material';
 import { Layout } from '../../shared/ui/Layout';
 import { getDoctors, getSettings, updateSettings } from '../../data/source/doctors';
@@ -51,6 +51,7 @@ export function ScheduleScreen() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const isAdmin = user?.role === 'admin';
+  const isMobile = useMediaQuery(useTheme().breakpoints.down('sm'));
 
   const { data: doctors = [], isLoading: doctorsLoading } = useQuery({
     queryKey: ['doctors'],
@@ -124,10 +125,10 @@ export function ScheduleScreen() {
 
   return (
     <Layout title="Расписание">
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Typography variant="h5" fontWeight={600}>Расписание</Typography>
         {isAdmin && (
-          <FormControl size="small" sx={{ minWidth: 160 }}>
+          <FormControl size="small" sx={{ minWidth: isMobile ? '100%' : 160 }}>
             <InputLabel>Период отображения</InputLabel>
             <Select
               label="Период отображения"
@@ -165,56 +166,88 @@ export function ScheduleScreen() {
       )}
 
       {!isLoading && matrix.length > 0 && (
-        <TableContainer component={Paper}>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ width: 140 }}>Дата</TableCell>
-                <TableCell>Врачи</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {matrix.map(({ date, working }) => (
-                <TableRow key={isoDate(date)} hover>
-                  <TableCell>
-                    <Typography variant="body2" fontWeight={500}>
-                      {formatDate(date)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Stack direction="row" flexWrap="wrap" gap={1}>
-                      {working.map(({ doc, time_from, time_to }, i) => (
-                        <Box
-                          key={i}
-                          sx={{
-                            display: 'flex', alignItems: 'center', gap: 1,
-                            border: '1px solid', borderColor: 'divider',
-                            borderRadius: 2, px: 1.5, py: 0.5,
-                            cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' },
-                          }}
-                          onClick={() => navigate(`/doctors/${doc.id}/edit`)}
-                        >
-                          <Avatar
-                            src={doc.photo_url ? `${BASE_URL}${doc.photo_url}` : undefined}
-                            sx={{ width: 28, height: 28, fontSize: 14 }}
-                          >
-                            {doc.full_name[0]}
-                          </Avatar>
-                          <Box>
-                            <Typography variant="body2" lineHeight={1.2}>{doc.full_name}</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {time_from.slice(0, 5)} – {time_to.slice(0, 5)}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      ))}
-                    </Stack>
-                  </TableCell>
+        isMobile ? (
+          <Stack spacing={1.5}>
+            {matrix.map(({ date, working }) => (
+              <Paper key={isoDate(date)} sx={{ p: 2 }}>
+                <Typography variant="body2" fontWeight={600} color="text.secondary" mb={1}>
+                  {formatDate(date)}
+                </Typography>
+                <Stack spacing={1}>
+                  {working.map(({ doc, time_from, time_to }, i) => (
+                    <Box
+                      key={i}
+                      sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer' }}
+                      onClick={() => navigate(`/doctors/${doc.id}/edit`)}
+                    >
+                      <Avatar
+                        src={doc.photo_url ? `${BASE_URL}${doc.photo_url}` : undefined}
+                        sx={{ width: 36, height: 36, fontSize: 16 }}
+                      >
+                        {doc.full_name[0]}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="body2" fontWeight={500}>{doc.full_name}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {time_from.slice(0, 5)} – {time_to.slice(0, 5)}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ))}
+                </Stack>
+              </Paper>
+            ))}
+          </Stack>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ width: 140 }}>Дата</TableCell>
+                  <TableCell>Врачи</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {matrix.map(({ date, working }) => (
+                  <TableRow key={isoDate(date)} hover>
+                    <TableCell>
+                      <Typography variant="body2" fontWeight={500}>{formatDate(date)}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Stack direction="row" flexWrap="wrap" gap={1}>
+                        {working.map(({ doc, time_from, time_to }, i) => (
+                          <Box
+                            key={i}
+                            sx={{
+                              display: 'flex', alignItems: 'center', gap: 1,
+                              border: '1px solid', borderColor: 'divider',
+                              borderRadius: 2, px: 1.5, py: 0.5,
+                              cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' },
+                            }}
+                            onClick={() => navigate(`/doctors/${doc.id}/edit`)}
+                          >
+                            <Avatar
+                              src={doc.photo_url ? `${BASE_URL}${doc.photo_url}` : undefined}
+                              sx={{ width: 28, height: 28, fontSize: 14 }}
+                            >
+                              {doc.full_name[0]}
+                            </Avatar>
+                            <Box>
+                              <Typography variant="body2" lineHeight={1.2}>{doc.full_name}</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {time_from.slice(0, 5)} – {time_to.slice(0, 5)}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        ))}
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )
       )}
 
       {!isLoading && (
