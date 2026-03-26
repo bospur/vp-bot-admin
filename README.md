@@ -1,7 +1,7 @@
 # vp-bot-admin
 
 Административная панель для ветеринарного Telegram Mini App.
-Позволяет управлять контентом: животные, категории симптомов, статьи первой помощи.
+Управление контентом: животные, категории, статьи, врачи, расписание, пользователи.
 
 **Prod:** https://admin.snzbeachvolleyball25.ru
 
@@ -9,21 +9,20 @@
 
 | Инструмент | Назначение |
 |---|---|
-| Vite 8 + React 19 + TypeScript | Основа |
+| Vite + React 19 + TypeScript | Основа |
 | MUI v7 | UI-компоненты |
-| React Router v7 | Роутинг |
+| React Router v7 | Роутинг (data router, `useBlocker`) |
 | TanStack Query v5 | Серверное состояние |
-| TanStack Table v8 | Таблицы |
 | React Hook Form + Valibot | Формы и валидация |
 | TipTap v2 | WYSIWYG редактор статей |
 | Axios | HTTP-клиент |
 | emoji-picker-react | Выбор иконок |
 
-## Запуск локально
+## Быстрый старт
 
 ```bash
 npm install
-cp .env.example .env.local   # задай VITE_API_URL и VITE_CLINIC_SLUG
+cp .env.example .env.local   # задай VITE_API_URL
 npm run dev
 ```
 
@@ -32,24 +31,24 @@ npm run dev
 | Переменная | Описание | Пример |
 |---|---|---|
 | `VITE_API_URL` | Базовый URL бэкенда | `https://api.snzbeachvolleyball25.ru` |
-| `VITE_CLINIC_SLUG` | Slug клиники | `default` |
 
-## Статус
+## Функциональность
 
-- [x] Auth: JWT, AuthContext, axios interceptor
+- [x] Auth: JWT, роли admin / editor, axios interceptor
 - [x] Layout: AppBar + Sidebar (mobile hamburger)
-- [x] CRUD: Животные (таблица/карточки + emoji picker)
-- [x] CRUD: Категории (аккордеон по животным + emoji picker)
-- [x] CRUD: Статьи (список + full-page WYSIWYG редактор)
-- [x] TipTap редактор: H1/H2/H3, bold, italic, списки
-- [x] Авто-slug из заголовка (транслитерация)
-- [x] Привязка статей к категориям (чекбоксы)
-- [x] Деплой: GitHub Actions → VPS (scp)
-- [x] Bundle оптимизация: lazy routes + manual chunks
-- [ ] Mini App (vp-bot-app) — не начат
+- [x] Мобильная адаптация: карточки вместо таблиц на `< sm`
+- [x] CRUD: Животные
+- [x] CRUD: Категории (аккордеон по животным)
+- [x] CRUD: Статьи (WYSIWYG редактор, статусы draft/published, роли)
+- [x] CRUD: Врачи (фото, специализация, статусы, роли)
+- [x] Расписание: еженедельные слоты + исключения на дату
+- [x] Экран расписания клиники с настройкой периода (1–5 нед.)
+- [x] Управление пользователями (только admin)
+- [x] Предупреждение при уходе с несохранённой формы
 
 ## Документация
 
 - [Архитектура](docs/architecture.md)
+- [Разработка и контрибьютинг](docs/development.md)
 - [Деплой](docs/deployment.md)
 - [Инструкция для пользователя](docs/user-guide.md)

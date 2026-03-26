@@ -1,10 +1,10 @@
 # Архитектура фронтенда
 
-## Структура проекта (FSD)
+## Структура проекта (FSD-like)
 
 ```
 src/
-├── App.tsx                        — роутинг, lazy loading экранов
+├── App.tsx                        — роутинг (createBrowserRouter), lazy loading
 ├── main.tsx                       — точка входа
 │
 ├── data/
@@ -12,39 +12,53 @@ src/
 │       ├── axiosInstance.ts       — axios с Bearer interceptor
 │       ├── animals.ts
 │       ├── categories.ts
-│       └── articles.ts
+│       ├── articles.ts
+│       ├── doctors.ts             — врачи, расписание, исключения, настройки
+│       └── users.ts
 │
 ├── modules/                       — бизнес-модули
 │   ├── animals/
 │   │   ├── domain/types.ts        — Animal, AnimalFormValues
 │   │   └── features/
-│   │       ├── AnimalsTable/      — таблица / карточки + useLogic + styles
-│   │       └── AnimalFormDialog/  — диалог создания/редактирования + useLogic
+│   │       ├── AnimalsTable/      — таблица / карточки
+│   │       └── AnimalFormDialog/  — диалог создания/редактирования
 │   ├── categories/
-│   │   ├── domain/types.ts        — Category, CategoryRow, CategoryFormValues
+│   │   ├── domain/types.ts
 │   │   └── features/
-│   │       ├── CategoriesTable/   — аккордеон по животным + таблица/карточки
+│   │       ├── CategoriesTable/
 │   │       └── CategoryFormDialog/
-│   └── articles/
-│       ├── domain/types.ts        — Article, ArticleFormValues
+│   ├── articles/
+│   │   ├── domain/types.ts        — Article, ArticleFormValues, ArticleStatus
+│   │   └── features/
+│   │       └── ArticlesTable/     — таблица / карточки, publish/edit/delete
+│   ├── doctors/
+│   │   ├── domain/types.ts        — Doctor, DoctorScheduleSlot, DoctorScheduleException,
+│   │   │                            ClinicSettings, ScheduleEntry, DAY_NAMES
+│   │   └── features/
+│   │       └── DoctorsTable/      — таблица / карточки с аватаром
+│   └── auth/
+│       ├── domain/types.ts
 │       └── features/
-│           └── ArticlesTable/     — таблица / карточки
+│           └── LoginForm/
 │
-├── screens/                       — страницы (Layout + модули)
+├── screens/                       — страницы (Layout + модули + логика)
 │   ├── LoginScreen/
 │   ├── AnimalsScreen/
 │   ├── CategoriesScreen/
-│   ├── ArticlesScreen/            — список статей
-│   └── ArticleEditorScreen/       — full-page редактор статьи
+│   ├── ArticlesScreen/            — список + publish/delete
+│   ├── ArticleEditorScreen/       — full-page WYSIWYG редактор
+│   ├── DoctorsScreen/             — список врачей
+│   ├── DoctorEditorScreen/        — карточка + фото + расписание + исключения
+│   ├── ScheduleScreen/            — расписание клиники + настройка периода
+│   └── UsersScreen/               — управление пользователями (только admin)
 │
 └── shared/
     ├── config/
-    │   ├── env.ts                 — API_BASE_URL, CLINIC_SLUG
-    │   └── AuthContext.tsx        — JWT в localStorage, useAuth()
+    │   └── AuthContext.tsx        — JWT в localStorage, декодирование claims, useAuth()
     ├── theme/
-    │   └── theme.ts               — MUI тема (primary=#2e7d32, зелёная)
+    │   └── theme.ts               — MUI тема (primary=#2e7d32)
     └── ui/
-        ├── Layout/                — Drawer sidebar + AppBar + hamburger
+        ├── Layout/                — Drawer sidebar + AppBar + hamburger (mobile)
         ├── ProtectedRoute.tsx     — редирект на /login если нет токена
         ├── ConfirmDialog/         — переиспользуемый диалог подтверждения
         ├── Notification/          — NotificationContext, useNotification()
@@ -53,72 +67,80 @@ src/
 
 ## Паттерны
 
-### Структура фичи
-Каждая фича (компонент с логикой) состоит из трёх файлов:
-```
-features/MyFeature/
-├── index.tsx      — JSX компонент (только разметка)
-├── useLogic.ts    — хуки, мутации, состояние
-└── styles.ts      — MUI sx объекты (вынесены для чистоты JSX)
-```
-
 ### Запросы к API (TanStack Query)
 ```ts
 // Чтение
-const { data, isLoading } = useQuery({ queryKey: ['animals'], queryFn: getAnimals });
+const { data, isLoading } = useQuery({ queryKey: ['doctors'], queryFn: getDoctors });
 
-// Мутация
+// Мутация с инвалидацией кеша
 const mutation = useMutation({
-  mutationFn: (id) => deleteAnimal(id),
-  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['animals'] }),
+  mutationFn: (id) => deleteDoctor(id),
+  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['doctors'] }),
 });
 ```
 
 ### Формы (React Hook Form + Valibot)
 ```ts
-const schema = v.object({ name: v.pipe(v.string(), v.minLength(1, 'Обязательно')) });
-const form = useForm({ resolver: valibotResolver(schema) });
+const schema = v.object({ full_name: v.pipe(v.string(), v.minLength(1, 'Обязательно')) });
+const form = useForm({ resolver: valibotResolver(schema), defaultValues: { full_name: '' } });
 ```
 
-### Авторизация
-`AuthContext` хранит JWT в `localStorage`. `axiosInstance` автоматически добавляет `Authorization: Bearer <token>` ко всем запросам через interceptor.
+### Авторизация и роли
+`AuthContext` хранит JWT в `localStorage` и декодирует claims (`user_id`, `clinic_id`, `role`).
+`axiosInstance` автоматически добавляет `Authorization: Bearer <token>`.
+
+```tsx
+const { user } = useAuth();
+const isAdmin = user?.role === 'admin';
+```
+
+### Защита от ухода без сохранения
+Все формы редактирования используют `useBlocker` (React Router) + `beforeunload` event.
 
 ## Роутинг
 
-| Путь | Компонент | Описание |
-|------|-----------|----------|
-| `/login` | LoginScreen | Форма входа |
-| `/animals` | AnimalsScreen | CRUD животных |
-| `/categories` | CategoriesScreen | CRUD категорий |
-| `/articles` | ArticlesScreen | Список статей |
-| `/articles/new` | ArticleEditorScreen | Создание статьи |
-| `/articles/:id/edit` | ArticleEditorScreen | Редактирование статьи |
+| Путь | Экран | Доступ |
+|------|-------|--------|
+| `/login` | LoginScreen | Публичный |
+| `/animals` | AnimalsScreen | Все роли |
+| `/categories` | CategoriesScreen | Все роли |
+| `/articles` | ArticlesScreen | Все роли |
+| `/articles/new` | ArticleEditorScreen | Все роли |
+| `/articles/:id/edit` | ArticleEditorScreen | Все роли |
+| `/doctors` | DoctorsScreen | Все роли |
+| `/doctors/new` | DoctorEditorScreen | Все роли |
+| `/doctors/:id/edit` | DoctorEditorScreen | Все роли |
+| `/schedule` | ScheduleScreen | Все роли (настройки — только admin) |
+| `/users` | UsersScreen | Только admin (в UI) |
 
-Все защищённые маршруты обёрнуты в `ProtectedRoute`.
+Роутер использует `createBrowserRouter` — обязательно для работы `useBlocker`.
+
+## Ролевая модель
+
+| Действие | editor | admin |
+|----------|--------|-------|
+| Создавать/редактировать черновики | ✅ | ✅ |
+| Публиковать статьи и врачей | ❌ | ✅ |
+| Редактировать опубликованные | ❌ | ✅ |
+| Управлять пользователями | ❌ | ✅ |
+| Менять настройки клиники | ❌ | ✅ |
 
 ## Мобильная адаптация
 
-- Layout `<md` → временный Drawer с hamburger кнопкой
-- Таблицы `<sm` → card view (Paper карточки)
-- Кнопки `<sm` → только IconButton (без текста)
+- `Layout` при `< md` → временный Drawer с hamburger
+- Все таблицы при `< sm` → card view (Paper карточки)
+- Кнопки "Добавить" при `< sm` → только `IconButton`
+- Формы — вертикальный `Stack`, адаптируются автоматически
 
 ## Оптимизация бандла
 
 - `React.lazy()` + `<Suspense>` для всех экранов
-- `manualChunks` в `vite.config.ts` — вендоры в отдельных чанках
+- `manualChunks` в `vite.config.ts`
 
 | Чанк | Содержимое | Размер (gzip) |
 |------|-----------|---------------|
-| vendor-mui | @mui/material, @mui/icons-material, @emotion | ~96 kB |
+| vendor-mui | @mui/material, @mui/icons-material | ~98 kB |
 | vendor-tiptap | @tiptap/*, prosemirror-* | ~90 kB |
 | vendor-emoji | emoji-picker-react | ~77 kB |
-| vendor-react | react, react-dom, react-router-dom | ~80 kB |
-| vendor-query | @tanstack/react-query, @tanstack/react-table | ~23 kB |
-
-## TipTap редактор
-
-`shared/ui/RichTextEditor` — обёртка над TipTap с MUI-стилизованным тулбаром.
-
-Поддерживаемые форматы: H1, H2, H3, жирный, курсив, маркированный список, нумерованный список.
-
-Контент сохраняется как HTML-строка. Бот конвертирует HTML в Telegram-формат на стороне сервера.
+| vendor-react | react, react-dom, react-router-dom | ~95 kB |
+| vendor-query | @tanstack/react-query | ~23 kB |
