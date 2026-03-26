@@ -11,6 +11,9 @@ const CategoriesScreen = lazy(() => import('./screens/CategoriesScreen').then((m
 const ArticlesScreen = lazy(() => import('./screens/ArticlesScreen').then((m) => ({ default: m.ArticlesScreen })));
 const ArticleEditorScreen = lazy(() => import('./screens/ArticleEditorScreen').then((m) => ({ default: m.ArticleEditorScreen })));
 const UsersScreen = lazy(() => import('./screens/UsersScreen').then((m) => ({ default: m.UsersScreen })));
+const DoctorsScreen = lazy(() => import('./screens/DoctorsScreen').then((m) => ({ default: m.DoctorsScreen })));
+const DoctorEditorScreen = lazy(() => import('./screens/DoctorEditorScreen').then((m) => ({ default: m.DoctorEditorScreen })));
+const ScheduleScreen = lazy(() => import('./screens/ScheduleScreen').then((m) => ({ default: m.ScheduleScreen })));
 
 const Loader = () => (
   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -29,6 +32,10 @@ const router = createBrowserRouter([
       { path: '/articles/new', element: <Suspense fallback={<Loader />}><ArticleEditorScreen /></Suspense> },
       { path: '/articles/:id/edit', element: <Suspense fallback={<Loader />}><ArticleEditorScreen /></Suspense> },
       { path: '/users', element: <Suspense fallback={<Loader />}><UsersScreen /></Suspense> },
+      { path: '/doctors', element: <Suspense fallback={<Loader />}><DoctorsScreen /></Suspense> },
+      { path: '/doctors/new', element: <Suspense fallback={<Loader />}><DoctorEditorScreen /></Suspense> },
+      { path: '/doctors/:id/edit', element: <Suspense fallback={<Loader />}><DoctorEditorScreen /></Suspense> },
+      { path: '/schedule', element: <Suspense fallback={<Loader />}><ScheduleScreen /></Suspense> },
     ],
   },
   { path: '*', element: <Navigate to="/animals" replace /> },

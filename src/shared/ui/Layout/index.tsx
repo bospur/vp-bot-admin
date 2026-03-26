@@ -19,6 +19,8 @@ import PetsIcon from '@mui/icons-material/Pets';
 import CategoryIcon from '@mui/icons-material/Category';
 import ArticleIcon from '@mui/icons-material/Article';
 import PeopleIcon from '@mui/icons-material/People';
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useAuth } from '../../config/AuthContext';
@@ -29,6 +31,8 @@ const NAV_ITEMS = [
   { label: 'Животные', to: '/animals', icon: <PetsIcon />, adminOnly: false },
   { label: 'Категории', to: '/categories', icon: <CategoryIcon />, adminOnly: false },
   { label: 'Статьи', to: '/articles', icon: <ArticleIcon />, adminOnly: false },
+  { label: 'Врачи', to: '/doctors', icon: <MedicalServicesIcon />, adminOnly: false },
+  { label: 'Расписание', to: '/schedule', icon: <CalendarMonthIcon />, adminOnly: false },
   { label: 'Пользователи', to: '/users', icon: <PeopleIcon />, adminOnly: true },
 ];
 
