@@ -5,6 +5,7 @@ import {
   DialogContent, DialogTitle, FormControl, IconButton, InputLabel,
   MenuItem, Paper, Select, Stack, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, TextField, Tooltip, Typography,
+  useMediaQuery, useTheme,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -35,6 +36,7 @@ export function UsersScreen() {
   const { notify } = useNotification();
   const { user: currentUser } = useAuth();
   const queryClient = useQueryClient();
+  const isMobile = useMediaQuery(useTheme().breakpoints.down('sm'));
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
@@ -74,14 +76,38 @@ export function UsersScreen() {
     <Layout title="Пользователи">
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h5" fontWeight={600}>Пользователи</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setDialogOpen(true)}>
-          Добавить
-        </Button>
+        {isMobile ? (
+          <Tooltip title="Добавить">
+            <IconButton color="primary" onClick={() => setDialogOpen(true)}><AddIcon /></IconButton>
+          </Tooltip>
+        ) : (
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setDialogOpen(true)}>
+            Добавить
+          </Button>
+        )}
       </Box>
 
       {isLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
           <CircularProgress />
+        </Box>
+      ) : isMobile ? (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          {users.map((u) => (
+            <Paper key={u.id} sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography fontWeight={600}>{u.login}</Typography>
+                <Box sx={{ mt: 0.5 }}>{roleChip(u.role)}</Box>
+              </Box>
+              {u.id !== currentUser?.id && (
+                <Tooltip title="Удалить">
+                  <IconButton size="small" color="error" onClick={() => setDeleteTarget(u)}>
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Paper>
+          ))}
         </Box>
       ) : (
         <Paper variant="outlined">
