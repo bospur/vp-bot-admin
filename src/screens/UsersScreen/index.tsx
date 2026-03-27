@@ -22,15 +22,16 @@ import type { User } from '../../data/source/users';
 const schema = v.object({
   login: v.pipe(v.string(), v.minLength(1, 'Введите логин')),
   password: v.pipe(v.string(), v.minLength(6, 'Минимум 6 символов')),
-  role: v.union([v.literal('admin'), v.literal('editor')]),
+  role: v.union([v.literal('admin'), v.literal('editor'), v.literal('groomer')]),
 });
 
-type FormValues = { login: string; password: string; role: 'admin' | 'editor' };
+type FormValues = { login: string; password: string; role: 'admin' | 'editor' | 'groomer' };
 
-const roleChip = (role: User['role']) =>
-  role === 'admin'
-    ? <Chip label="Админ" size="small" color="primary" variant="outlined" />
-    : <Chip label="Редактор" size="small" variant="outlined" />;
+const roleChip = (role: User['role']) => {
+  if (role === 'admin') return <Chip label="Админ" size="small" color="primary" variant="outlined" />;
+  if (role === 'groomer') return <Chip label="Грумер" size="small" color="secondary" variant="outlined" />;
+  return <Chip label="Редактор" size="small" variant="outlined" />;
+};
 
 export function UsersScreen() {
   const { notify } = useNotification();
@@ -183,6 +184,7 @@ export function UsersScreen() {
                   <InputLabel>Роль</InputLabel>
                   <Select {...field} label="Роль">
                     <MenuItem value="editor">Редактор</MenuItem>
+                    <MenuItem value="groomer">Грумер</MenuItem>
                     <MenuItem value="admin">Админ</MenuItem>
                   </Select>
                 </FormControl>

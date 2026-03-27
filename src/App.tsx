@@ -1,9 +1,20 @@
 import { lazy, Suspense } from 'react';
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate, Outlet } from 'react-router-dom';
 import { CircularProgress, Box } from '@mui/material';
-import { AuthProvider } from './shared/config/AuthContext';
+import { AuthProvider, useAuth } from './shared/config/AuthContext';
 import { NotificationProvider } from './shared/ui/Notification/NotificationContext';
 import { ProtectedRoute } from './shared/ui/ProtectedRoute';
+
+function NonGroomerRoute() {
+  const { user } = useAuth();
+  if (user?.role === 'groomer') return <Navigate to="/grooming" replace />;
+  return <Outlet />;
+}
+
+function DefaultRedirect() {
+  const { user } = useAuth();
+  return <Navigate to={user?.role === 'groomer' ? '/grooming' : '/animals'} replace />;
+}
 
 const LoginScreen = lazy(() => import('./screens/LoginScreen').then((m) => ({ default: m.LoginScreen })));
 const AnimalsScreen = lazy(() => import('./screens/AnimalsScreen').then((m) => ({ default: m.AnimalsScreen })));
@@ -27,20 +38,25 @@ const router = createBrowserRouter([
   {
     element: <ProtectedRoute />,
     children: [
-      { path: '/animals', element: <Suspense fallback={<Loader />}><AnimalsScreen /></Suspense> },
-      { path: '/categories', element: <Suspense fallback={<Loader />}><CategoriesScreen /></Suspense> },
-      { path: '/articles', element: <Suspense fallback={<Loader />}><ArticlesScreen /></Suspense> },
-      { path: '/articles/new', element: <Suspense fallback={<Loader />}><ArticleEditorScreen /></Suspense> },
-      { path: '/articles/:id/edit', element: <Suspense fallback={<Loader />}><ArticleEditorScreen /></Suspense> },
-      { path: '/users', element: <Suspense fallback={<Loader />}><UsersScreen /></Suspense> },
-      { path: '/doctors', element: <Suspense fallback={<Loader />}><DoctorsScreen /></Suspense> },
-      { path: '/doctors/new', element: <Suspense fallback={<Loader />}><DoctorEditorScreen /></Suspense> },
-      { path: '/doctors/:id/edit', element: <Suspense fallback={<Loader />}><DoctorEditorScreen /></Suspense> },
-      { path: '/schedule', element: <Suspense fallback={<Loader />}><ScheduleScreen /></Suspense> },
+      {
+        element: <NonGroomerRoute />,
+        children: [
+          { path: '/animals', element: <Suspense fallback={<Loader />}><AnimalsScreen /></Suspense> },
+          { path: '/categories', element: <Suspense fallback={<Loader />}><CategoriesScreen /></Suspense> },
+          { path: '/articles', element: <Suspense fallback={<Loader />}><ArticlesScreen /></Suspense> },
+          { path: '/articles/new', element: <Suspense fallback={<Loader />}><ArticleEditorScreen /></Suspense> },
+          { path: '/articles/:id/edit', element: <Suspense fallback={<Loader />}><ArticleEditorScreen /></Suspense> },
+          { path: '/users', element: <Suspense fallback={<Loader />}><UsersScreen /></Suspense> },
+          { path: '/doctors', element: <Suspense fallback={<Loader />}><DoctorsScreen /></Suspense> },
+          { path: '/doctors/new', element: <Suspense fallback={<Loader />}><DoctorEditorScreen /></Suspense> },
+          { path: '/doctors/:id/edit', element: <Suspense fallback={<Loader />}><DoctorEditorScreen /></Suspense> },
+          { path: '/schedule', element: <Suspense fallback={<Loader />}><ScheduleScreen /></Suspense> },
+        ],
+      },
       { path: '/grooming', element: <Suspense fallback={<Loader />}><GroomingScreen /></Suspense> },
     ],
   },
-  { path: '*', element: <Navigate to="/animals" replace /> },
+  { path: '*', element: <DefaultRedirect /> },
 ]);
 
 export default function App() {

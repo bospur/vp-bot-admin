@@ -29,13 +29,13 @@ import { useNotification } from '../Notification/NotificationContext';
 import { styles, appBarSx, mainSx } from './styles';
 
 const NAV_ITEMS = [
-  { label: 'Животные', to: '/animals', icon: <PetsIcon />, adminOnly: false },
-  { label: 'Категории', to: '/categories', icon: <CategoryIcon />, adminOnly: false },
-  { label: 'Статьи', to: '/articles', icon: <ArticleIcon />, adminOnly: false },
-  { label: 'Врачи', to: '/doctors', icon: <MedicalServicesIcon />, adminOnly: false },
-  { label: 'Расписание', to: '/schedule', icon: <CalendarMonthIcon />, adminOnly: false },
-  { label: 'Груминг', to: '/grooming', icon: <ContentCutIcon />, adminOnly: false },
-  { label: 'Пользователи', to: '/users', icon: <PeopleIcon />, adminOnly: true },
+  { label: 'Животные', to: '/animals', icon: <PetsIcon />, roles: ['admin', 'editor'] },
+  { label: 'Категории', to: '/categories', icon: <CategoryIcon />, roles: ['admin', 'editor'] },
+  { label: 'Статьи', to: '/articles', icon: <ArticleIcon />, roles: ['admin', 'editor'] },
+  { label: 'Врачи', to: '/doctors', icon: <MedicalServicesIcon />, roles: ['admin', 'editor'] },
+  { label: 'Расписание', to: '/schedule', icon: <CalendarMonthIcon />, roles: ['admin', 'editor'] },
+  { label: 'Груминг', to: '/grooming', icon: <ContentCutIcon />, roles: ['admin', 'editor', 'groomer'] },
+  { label: 'Пользователи', to: '/users', icon: <PeopleIcon />, roles: ['admin'] },
 ];
 
 interface LayoutProps {
@@ -66,7 +66,7 @@ export function Layout({ children, title = 'VP Admin' }: LayoutProps) {
         </Typography>
       </Box>
       <List sx={{ pt: 1, flexGrow: 1 }}>
-        {NAV_ITEMS.filter(({ adminOnly }) => !adminOnly || user?.role === 'admin').map(({ label, to, icon }) => (
+        {NAV_ITEMS.filter(({ roles }) => !user || roles.includes(user.role)).map(({ label, to, icon }) => (
           <ListItemButton
             key={to}
             component={NavLink}

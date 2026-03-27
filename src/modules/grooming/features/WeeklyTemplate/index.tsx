@@ -34,9 +34,9 @@ function TemplateRow({
 
   return (
     <Stack
-      direction="row"
-      alignItems="center"
-      spacing={2}
+      direction={{ xs: 'column', sm: 'row' }}
+      alignItems={{ xs: 'flex-start', sm: 'center' }}
+      spacing={{ xs: 1, sm: 2 }}
       sx={{
         py: 1.5,
         px: 2,
@@ -45,17 +45,19 @@ function TemplateRow({
         transition: 'background-color 0.2s',
       }}
     >
-      <Switch
-        checked={enabled}
-        onChange={(e) => onToggle(dayOfWeek, e.target.checked)}
-        disabled={saving}
-        size="small"
-      />
-      <Typography
-        sx={{ minWidth: 110, fontWeight: enabled ? 600 : 400, color: enabled ? 'text.primary' : 'text.disabled' }}
-      >
-        {DAY_NAMES_FULL[dayOfWeek]}
-      </Typography>
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <Switch
+          checked={enabled}
+          onChange={(e) => onToggle(dayOfWeek, e.target.checked)}
+          disabled={saving}
+          size="small"
+        />
+        <Typography
+          sx={{ minWidth: { xs: 'auto', sm: 110 }, fontWeight: enabled ? 600 : 400, color: enabled ? 'text.primary' : 'text.disabled' }}
+        >
+          {DAY_NAMES_FULL[dayOfWeek]}
+        </Typography>
+      </Stack>
       {enabled ? (
         <Stack direction="row" spacing={1} alignItems="center">
           <TextField

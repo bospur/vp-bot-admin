@@ -5,7 +5,7 @@ const TOKEN_KEY = 'vp_admin_token';
 interface AuthUser {
   id: number;
   clinicId: number;
-  role: 'admin' | 'editor';
+  role: 'admin' | 'editor' | 'groomer';
 }
 
 interface AuthContextValue {

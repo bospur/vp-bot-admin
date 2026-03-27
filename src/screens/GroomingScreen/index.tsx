@@ -214,7 +214,7 @@ export function GroomingScreen() {
 
   return (
     <Layout title="Груминг">
-      <Box sx={{ maxWidth: 1100, mx: 'auto', p: { xs: 2, md: 3 } }}>
+      <Box>
         <Tabs value={mainTab} onChange={(_, v) => setMainTab(v)} sx={{ mb: 3 }}>
           <Tab label="Коллекция пород" />
           <Tab label="Расписание" />
@@ -326,7 +326,7 @@ export function GroomingScreen() {
                               border: '1px solid',
                               borderColor: isSelected ? 'primary.main' : 'divider',
                               borderRadius: 1,
-                              p: 0.75,
+                              p: { xs: 0.5, sm: 0.75 },
                               cursor: isWorking ? 'pointer' : 'default',
                               bgcolor: isSelected
                                 ? 'primary.light'
@@ -336,7 +336,7 @@ export function GroomingScreen() {
                                 ? 'background.paper'
                                 : 'action.disabledBackground',
                               opacity: isWorking ? 1 : 0.5,
-                              minHeight: 64,
+                              minHeight: { xs: 44, sm: 64 },
                               '&:hover': isWorking ? { bgcolor: isSelected ? 'primary.light' : 'action.hover' } : {},
                               transition: 'background-color 0.15s',
                             }}
