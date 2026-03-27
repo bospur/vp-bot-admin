@@ -11,7 +11,7 @@ import type { Article } from '../../domain/types';
 
 interface ArticlesTableProps {
   data: Article[];
-  role: 'admin' | 'editor';
+  role: 'admin' | 'editor' | 'groomer';
   onEdit: (article: Article) => void;
   onDelete: (article: Article) => void;
   onPublish: (article: Article) => void;
