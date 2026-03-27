@@ -23,7 +23,7 @@ import type { Doctor } from '../../domain/types';
 
 interface DoctorsTableProps {
   data: Doctor[];
-  role: 'admin' | 'editor';
+  role: 'admin' | 'editor' | 'groomer';
   onEdit: (d: Doctor) => void;
   onDelete: (d: Doctor) => void;
   onPublish: (d: Doctor) => void;
