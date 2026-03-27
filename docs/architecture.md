@@ -14,7 +14,8 @@ src/
 │       ├── categories.ts
 │       ├── articles.ts
 │       ├── doctors.ts             — врачи, расписание, исключения, настройки
-│       └── users.ts
+│       ├── users.ts
+│       └── grooming.ts            — породы, шаблон недели, записи грумера
 │
 ├── modules/                       — бизнес-модули
 │   ├── animals/
@@ -36,6 +37,15 @@ src/
 │   │   │                            ClinicSettings, ScheduleEntry, DAY_NAMES
 │   │   └── features/
 │   │       └── DoctorsTable/      — таблица / карточки с аватаром
+│   ├── grooming/
+│   │   ├── domain/types.ts        — GroomingBreed, GroomingTemplateSlot, GroomingAppointment,
+│   │   │                            DAY_NAMES_SHORT, DAY_NAMES_FULL
+│   │   └── features/
+│   │       ├── BreedsTable/       — таблица / карточки пород
+│   │       ├── BreedFormDialog/   — диалог создания/редактирования породы
+│   │       ├── WeeklyTemplate/    — 7 переключателей + time inputs, auto-save
+│   │       ├── DayTimeline/       — пиксельная сетка дня (2px/мин), hover-слоты, блоки записей
+│   │       └── AppointmentFormDialog/ — форма записи (порода, кличка, телефон, время)
 │   └── auth/
 │       ├── domain/types.ts
 │       └── features/
@@ -50,7 +60,8 @@ src/
 │   ├── DoctorsScreen/             — список врачей
 │   ├── DoctorEditorScreen/        — карточка + фото + расписание + исключения
 │   ├── ScheduleScreen/            — расписание клиники + настройка периода
-│   └── UsersScreen/               — управление пользователями (только admin)
+│   ├── UsersScreen/               — управление пользователями (только admin)
+│   └── GroomingScreen/            — породы + шаблон + месячный календарь + тайм-лайн
 │
 └── shared/
     ├── config/
@@ -112,6 +123,7 @@ const isAdmin = user?.role === 'admin';
 | `/doctors/:id/edit` | DoctorEditorScreen | Все роли |
 | `/schedule` | ScheduleScreen | Все роли (настройки — только admin) |
 | `/users` | UsersScreen | Только admin (в UI) |
+| `/grooming` | GroomingScreen | Все роли |
 
 Роутер использует `createBrowserRouter` — обязательно для работы `useBlocker`.
 
@@ -139,7 +151,7 @@ const isAdmin = user?.role === 'admin';
 
 | Чанк | Содержимое | Размер (gzip) |
 |------|-----------|---------------|
-| vendor-mui | @mui/material, @mui/icons-material | ~98 kB |
+| vendor-mui | @mui/material, @mui/icons-material | ~104 kB |
 | vendor-tiptap | @tiptap/*, prosemirror-* | ~90 kB |
 | vendor-emoji | emoji-picker-react | ~77 kB |
 | vendor-react | react, react-dom, react-router-dom | ~95 kB |
