@@ -21,6 +21,7 @@ import ArticleIcon from '@mui/icons-material/Article';
 import PeopleIcon from '@mui/icons-material/People';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import ContentCutIcon from '@mui/icons-material/ContentCut';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useAuth } from '../../config/AuthContext';
@@ -33,6 +34,7 @@ const NAV_ITEMS = [
   { label: 'Статьи', to: '/articles', icon: <ArticleIcon />, adminOnly: false },
   { label: 'Врачи', to: '/doctors', icon: <MedicalServicesIcon />, adminOnly: false },
   { label: 'Расписание', to: '/schedule', icon: <CalendarMonthIcon />, adminOnly: false },
+  { label: 'Груминг', to: '/grooming', icon: <ContentCutIcon />, adminOnly: false },
   { label: 'Пользователи', to: '/users', icon: <PeopleIcon />, adminOnly: true },
 ];
 
