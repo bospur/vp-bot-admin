@@ -14,6 +14,7 @@ const UsersScreen = lazy(() => import('./screens/UsersScreen').then((m) => ({ de
 const DoctorsScreen = lazy(() => import('./screens/DoctorsScreen').then((m) => ({ default: m.DoctorsScreen })));
 const DoctorEditorScreen = lazy(() => import('./screens/DoctorEditorScreen').then((m) => ({ default: m.DoctorEditorScreen })));
 const ScheduleScreen = lazy(() => import('./screens/ScheduleScreen').then((m) => ({ default: m.ScheduleScreen })));
+const GroomingScreen = lazy(() => import('./screens/GroomingScreen').then((m) => ({ default: m.GroomingScreen })));
 
 const Loader = () => (
   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -36,6 +37,7 @@ const router = createBrowserRouter([
       { path: '/doctors/new', element: <Suspense fallback={<Loader />}><DoctorEditorScreen /></Suspense> },
       { path: '/doctors/:id/edit', element: <Suspense fallback={<Loader />}><DoctorEditorScreen /></Suspense> },
       { path: '/schedule', element: <Suspense fallback={<Loader />}><ScheduleScreen /></Suspense> },
+      { path: '/grooming', element: <Suspense fallback={<Loader />}><GroomingScreen /></Suspense> },
     ],
   },
   { path: '*', element: <Navigate to="/animals" replace /> },
